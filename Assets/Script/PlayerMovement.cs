@@ -134,6 +134,7 @@ public class PlayerMovement : MonoBehaviour
             currentHealth -= 10f;
             float dirx = collision.contacts[0].point.x - transform.position.x;
             float dirz = collision.contacts[0].point.z - transform.position.z;
+            rb.velocity = Vector3.zero;
             rb.AddForce(-dirx*900, 0, -dirz*700);
             killScore += 1;
         }
@@ -144,6 +145,7 @@ public class PlayerMovement : MonoBehaviour
             currentHealth -= 30f;
             float dirx = collision.contacts[0].point.x - transform.position.x;
             float dirz = collision.contacts[0].point.z - transform.position.z;
+            rb.velocity = Vector3.zero;
             rb.AddForce(-dirx * 2000, 0, -dirz * 2000);
         }
     }
@@ -196,6 +198,5 @@ public class PlayerMovement : MonoBehaviour
         gameover.transform.localScale = new Vector3(1, 1, 1);
         Time.timeScale = 0;
     }
-
 
 }
