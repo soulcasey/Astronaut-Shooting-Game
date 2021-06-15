@@ -11,17 +11,18 @@ public class PlayerMovement : MonoBehaviour
     private Animator anim;
     public GameObject enemy;
 
-    private float spawntime = 0.5f;
+    private float spawntime = 0.7f;
     private float nextspawn;
 
     public float speed;
     public float jump;
     public bool ground = true;
     public bool right = false;
+    private bool moveable;
 
     public HealthBar healthBar;
-    public float maxHealth = 100;
-    public float currentHealth = 100;
+    public float maxHealth = 100f;
+    public float currentHealth = 100f;
     private float nextDamage;
 
     public GameObject heart;
@@ -60,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey("w") || Input.GetKey("a") || Input.GetKey("d"))
+        if (Input.GetKey("w") || (Input.GetKey("a")&&!Input.GetKey("s")) || (Input.GetKey("d") && !Input.GetKey("s")))
         {
             anim.SetInteger("AnimationPar", 1);
         }
@@ -83,6 +84,8 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+
+        healthBar.SetHealth(currentHealth);
         transform.Translate(Input.GetAxis("Horizontal") * Time.deltaTime * speed, 0, Input.GetAxis("Vertical") * Time.deltaTime * speed);
 
         if (Input.GetButton("Jump") && ground)
@@ -135,7 +138,7 @@ public class PlayerMovement : MonoBehaviour
             float dirx = collision.contacts[0].point.x - transform.position.x;
             float dirz = collision.contacts[0].point.z - transform.position.z;
             rb.velocity = Vector3.zero;
-            rb.AddForce(-dirx*900, 0, -dirz*700);
+            rb.AddForce(-dirx*500, 0, -dirz*500);
             killScore += 1;
         }
 
@@ -186,7 +189,6 @@ public class PlayerMovement : MonoBehaviour
         {
             nextDamage = Time.time + 0.005f;
             currentHealth -= 0.01f;
-            healthBar.SetHealth(currentHealth);
         }
     }
 
@@ -197,6 +199,11 @@ public class PlayerMovement : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         gameover.transform.localScale = new Vector3(1, 1, 1);
         Time.timeScale = 0;
+    }
+
+    void Freeze()
+    {
+        moveable = false;
     }
 
 }

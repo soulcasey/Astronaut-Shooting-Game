@@ -5,8 +5,9 @@ using UnityEngine;
 public class RobotMovement : MonoBehaviour
 {
     public Transform Player;
-    public Transform Robot;
     private int MoveSpeed = 9;
+    public RobotHealthBar healthBar;
+
 
     private float hp;
     private float spawn;
@@ -28,7 +29,8 @@ public class RobotMovement : MonoBehaviour
     void Start()
     {
         anim = gameObject.GetComponent<Animator>();
-        hp = 40f;
+        hp = 30f;
+        healthBar.SetMaxHealth(hp);
         begin = Time.time;
         open = false;
         walkSound = ground.GetComponent<AudioSource>();
@@ -48,6 +50,10 @@ public class RobotMovement : MonoBehaviour
             {
                 open = true;
                 walk = Time.time;
+            }
+            if(open == false)
+            {
+                hp = 30f;
             }
             if (open == true)
             {
@@ -84,6 +90,11 @@ public class RobotMovement : MonoBehaviour
             }
         }
 
+    }
+
+    private void FixedUpdate()
+    {
+        healthBar.SetHealth(hp);
     }
 
     public void Damaged(float damage)
