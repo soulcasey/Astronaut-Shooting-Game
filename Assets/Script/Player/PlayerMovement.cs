@@ -44,8 +44,6 @@ public class PlayerMovement : MonoBehaviour
         HandleShooting();
 
         CheckStatus();
-
-        //PassiveDamage();
     }
 
     private void HandleMovement()
@@ -77,7 +75,6 @@ public class PlayerMovement : MonoBehaviour
        if (Input.GetKey(KeyCode.Mouse0)) gunShot.Shoot();
     }
 
-
     private void CheckStatus()
     {
         if (gameObject.transform.position.y < -30 || CurrentHealth <= 0)
@@ -89,6 +86,10 @@ public class PlayerMovement : MonoBehaviour
     public void TakeDamage(int amount)
     {
         CurrentHealth = Math.Max(0, CurrentHealth - amount);
+        if (CurrentHealth < 0)
+        {
+            Death();
+        }
     }
 
     public void Heal(int amount)
@@ -125,29 +126,9 @@ public class PlayerMovement : MonoBehaviour
         rb.linearVelocity = Vector3.zero;
         rb.AddForce(-dirx * force, 0, -dirz * force);
     }
-
-    // void PassiveDamage()
-    // {
-    //     if (Time.time > nextDamage)
-    //     {
-    //         nextDamage = Time.time + 0.005f;
-    //         CurrentHealth -= 0.01f;
-    //     }
-    // }
-
     private void Death()
     {
         IsAlive = false;
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-        
-        Time.timeScale = 0;
         GameManager.Instance.GameOver();
     }
-
-    void Freeze()
-    {
-        // moveable = false;
-    }
-
 }

@@ -19,7 +19,7 @@ public class GameOverScreen : MonoBehaviour
 
     private void OnEnable()
     {
-        heartText.text = GameManager.Instance.heartScore.ToString();
+        heartText.text = GameManager.Instance.HeartScore.ToString();
         timeText.text = timeScore.GetFormattedTime();
     }
 }

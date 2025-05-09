@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class Spike : MonoBehaviour, IDamageable
 {
+    public AudioSource hitSound;
+
     private enum SpikeState { Grow, Fall, Grounded, Shrink }
 
     private SpikeState currentState = SpikeState.Grow;
@@ -47,6 +49,7 @@ public class Spike : MonoBehaviour, IDamageable
     {
         if (collision.gameObject.CompareTag("Player") && collision.gameObject.TryGetComponent(out PlayerMovement playerMovement))
         {
+            hitSound.Play();
             playerMovement.ApplyKnockback(collision, KNOCKBACK_FORCE);
             playerMovement.TakeDamage(HIT_DAMAGE);
             ChangeState(SpikeState.Shrink);

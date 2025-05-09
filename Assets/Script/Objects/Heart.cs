@@ -34,7 +34,7 @@ public class Heart: MonoBehaviour
             playerMovement.heartGainParticle.Play();
             playerMovement.Heal(HEAL_AMOUNT);
 
-            GameManager.Instance.heartScore ++;
+            GameManager.Instance.HeartScore ++;
             Reposition();
         }
     }
