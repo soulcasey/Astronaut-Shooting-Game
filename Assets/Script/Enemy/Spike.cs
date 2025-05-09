@@ -6,9 +6,12 @@ public class Spike : MonoBehaviour, IDamageable
     public AudioSource hitSound;
 
     private enum SpikeState { Grow, Fall, Grounded, Shrink }
-
     private SpikeState currentState = SpikeState.Grow;
+    private Coroutine stateCoroutine;
     private float hp = 3f;
+
+    private Outline outline;
+    private Coroutine outlineCoroutine;
 
     private const int FALL_SPEED = 4;
     public const float SPAWN_INTERVAL_SECONDS = 0.7f;
@@ -22,6 +25,11 @@ public class Spike : MonoBehaviour, IDamageable
     {
         transform.localScale = Vector3.one * 0.1f;
         StartCoroutine(HandleState());
+
+        outline = gameObject.AddComponent<Outline>();
+        outline.enabled = false;
+        outline.OutlineWidth = 10;
+        outline.OutlineColor = Color.red;
     }
 
     public static Vector3 GetRandomPosition()
@@ -36,7 +44,8 @@ public class Spike : MonoBehaviour, IDamageable
     public void OnHit(float damage)
     {
         if (currentState != SpikeState.Fall) return;
-                
+
+        HitOutline();
         hp = Mathf.Max(0f, hp - damage);
         
         if (hp <= 0)
@@ -58,9 +67,9 @@ public class Spike : MonoBehaviour, IDamageable
 
     private void ChangeState(SpikeState newState)
     {
-        StopAllCoroutines();
+        if (stateCoroutine != null) StopCoroutine(stateCoroutine);
         currentState = newState;
-        StartCoroutine(HandleState());
+        stateCoroutine = StartCoroutine(HandleState());
     }
 
     private IEnumerator HandleState()
@@ -129,5 +138,21 @@ public class Spike : MonoBehaviour, IDamageable
         }
 
         Destroy(gameObject);
+    }
+
+    private void HitOutline()
+    {
+        if (outlineCoroutine != null)
+        {
+            StopCoroutine(outlineCoroutine);
+        }
+        outlineCoroutine = StartCoroutine(ShowOutline());
+    }
+    
+    private IEnumerator ShowOutline()
+    {
+        outline.enabled = true;
+        yield return new WaitForSeconds(0.2f);
+        outline.enabled = false;
     }
 }

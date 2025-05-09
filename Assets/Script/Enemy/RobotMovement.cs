@@ -6,6 +6,7 @@ public class RobotMovement : MonoBehaviour, IDamageable
 {
     private enum RobotState { Off, On, Idle, Chase }
     private RobotState currentState = RobotState.Off;
+    private Coroutine stateCoroutine;
 
     public Transform target;
     public Animator anim;
@@ -13,6 +14,9 @@ public class RobotMovement : MonoBehaviour, IDamageable
     public AudioSource startSound;
     public AudioSource stopSound;
     public AudioSource attackSound;
+
+    private Outline outline;
+    private Coroutine outlineCoroutine;
 
     public float CurrentHealth { get; private set; } = MAX_HEALTH;
     public const float MAX_HEALTH = 30f;
@@ -27,13 +31,18 @@ public class RobotMovement : MonoBehaviour, IDamageable
     private void Start()
     {
         ChangeState(RobotState.On);
+
+        outline = gameObject.AddComponent<Outline>();
+        outline.enabled = false;
+        outline.OutlineWidth = 10;
+        outline.OutlineColor = Color.red;
     }
 
     private void ChangeState(RobotState newState)
     {
-        StopAllCoroutines();
+        if (stateCoroutine != null) StopCoroutine(stateCoroutine);
         currentState = newState;
-        StartCoroutine(HandleState());
+        stateCoroutine = StartCoroutine(HandleState());
     }
 
     private IEnumerator HandleState()
@@ -89,7 +98,8 @@ public class RobotMovement : MonoBehaviour, IDamageable
     public void OnHit(float damage)
     {
         if (currentState != RobotState.Idle && currentState != RobotState.Chase) return;
-                
+        
+        HitOutline();
         CurrentHealth = Mathf.Max(0f, CurrentHealth - damage);
         
         if (CurrentHealth <= 0)
@@ -106,5 +116,21 @@ public class RobotMovement : MonoBehaviour, IDamageable
             playerMovement.ApplyKnockback(collision, KNOCKBACK_FORCE);
             playerMovement.TakeDamage(HIT_DAMAGE);
         }
+    }
+
+    private void HitOutline()
+    {
+        if (outlineCoroutine != null)
+        {
+            StopCoroutine(outlineCoroutine);
+        }
+        outlineCoroutine = StartCoroutine(ShowOutline());
+    }
+    
+    private IEnumerator ShowOutline()
+    {
+        outline.enabled = true;
+        yield return new WaitForSeconds(0.2f);
+        outline.enabled = false;
     }
 }
