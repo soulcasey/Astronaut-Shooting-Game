@@ -4,6 +4,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+public enum PlayerAnimation
+{
+    Idle,
+    Walk,
+    Backward,
+    Jump,
+    Roll
+}
+
+
 public enum PlayerStatus
 {
     Active,
@@ -13,6 +23,8 @@ public enum PlayerStatus
 
 public class PlayerMovement : MonoBehaviour
 {
+    private Camera mainCamera;
+
     public Rigidbody rb;
     public Animator anim;
 
@@ -29,15 +41,30 @@ public class PlayerMovement : MonoBehaviour
     public AudioSource heartSound;
     public AudioSource jumpSound;
 
+    // Roll
+    private bool isRolling = false;
+    private Coroutine rollCoroutine;
+    private bool canRoll = true;
+    private const float ROLL_COOLDOWN = 1.2f;
+    private const float ROLL_DURATION = 0.6f;
+    private const float ROLL_FORCE = 18f;
+
     public bool IsAlive { get; private set; } = true;
 
-    private const string ANIMATION_KEY = "AnimationPar";
+    private const string ANIMATION_KEY = "Animation";
     private const int MOVEMENT_SPEED = 7;
     private const int JUMP_FORCE = 20;
+
+    private void Start()
+    {
+        mainCamera = Camera.main;
+    }
 
     private void Update()
     {
         if (IsAlive == false) return;
+
+        PlayerRotation();
 
         HandleMovement();
 
@@ -48,17 +75,26 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (Input.GetKey(KeyCode.S))
+        if (isRolling || !IsAlive) return;
+
+        if (isGround)
         {
-            anim.SetInteger(ANIMATION_KEY, 2);
-        }
-        else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
-        {
-            anim.SetInteger(ANIMATION_KEY, 1);
-        }
-        else
-        {
-            anim.SetInteger(ANIMATION_KEY, 0);
+            if (Input.GetKeyDown(KeyCode.Mouse1) && canRoll)
+            {
+                rollCoroutine = StartCoroutine(PerformRoll());
+            }
+            else if (Input.GetKey(KeyCode.S))
+            {
+                anim.SetInteger(ANIMATION_KEY, (int)PlayerAnimation.Backward);
+            }
+            else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+            {
+                anim.SetInteger(ANIMATION_KEY, (int)PlayerAnimation.Walk);
+            }
+            else
+            {
+                anim.SetInteger(ANIMATION_KEY, (int)PlayerAnimation.Idle);
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && isGround)
@@ -70,9 +106,54 @@ public class PlayerMovement : MonoBehaviour
 
         transform.Translate(Input.GetAxis("Horizontal") * Time.deltaTime * MOVEMENT_SPEED, 0, Input.GetAxis("Vertical") * Time.deltaTime * MOVEMENT_SPEED);
     }
+
+    private void PlayerRotation()
+    {
+        if (isRolling == true) return;
+        transform.rotation = Quaternion.Euler(0, mainCamera.transform.rotation.eulerAngles.y, 0);
+    }
+
+    private IEnumerator PerformRoll()
+    {
+        StartCoroutine(RollCooldown());
+
+        isRolling = true;
+
+        Vector3 inputDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
+
+        if (inputDirection == Vector3.zero)
+        {
+            inputDirection = Vector3.forward; // Default forward if no input
+        }
+
+        Vector3 rollDirection = transform.TransformDirection(inputDirection);
+
+        // Face the roll direction
+        transform.rotation = Quaternion.LookRotation(rollDirection);
+
+        anim.SetInteger(ANIMATION_KEY, (int)PlayerAnimation.Roll);
+
+        float elapsed = 0f;
+        while (elapsed < ROLL_DURATION)
+        {
+            transform.Translate(rollDirection * Time.deltaTime * ROLL_FORCE, Space.World);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        isRolling = false;
+    }
+
+    private IEnumerator RollCooldown()
+    {
+        canRoll = false;
+        yield return new WaitForSeconds(ROLL_COOLDOWN);
+        canRoll = true;
+    }
+
     private void HandleShooting()
     {
-       if (Input.GetKey(KeyCode.Mouse0)) gunShot.Shoot();
+       if (Input.GetKey(KeyCode.Mouse0) && !isRolling) gunShot.Shoot();
     }
 
     private void CheckStatus()
@@ -103,9 +184,8 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGround = true;
-            anim.SetBool("Air", false);
+            if (!isRolling) anim.SetInteger(ANIMATION_KEY, (int)PlayerAnimation.Idle);
             anim.SetFloat("AnimSpeed", 1f);
-            anim.SetBool("Right", !anim.GetBool("Right"));
         }
     }
     
@@ -114,18 +194,28 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGround = false;
-            anim.SetBool("Air", true);
+            anim.SetBool("Right", !anim.GetBool("Right"));
+            anim.SetInteger(ANIMATION_KEY, (int)PlayerAnimation.Jump);
             anim.SetFloat("AnimSpeed", 0.4f);
         }
     }
 
     public void ApplyKnockback(Collision collision, int force)
     {
+        if (isRolling == true && rollCoroutine != null)
+        {
+            StopCoroutine(rollCoroutine);
+            isRolling = false;
+            anim.SetInteger(ANIMATION_KEY, (int)PlayerAnimation.Idle);
+        }
+
         float dirx = collision.contacts[0].point.x - transform.position.x;
         float dirz = collision.contacts[0].point.z - transform.position.z;
         rb.linearVelocity = Vector3.zero;
         rb.AddForce(-dirx * force, 0, -dirz * force);
     }
+
+
     private void Death()
     {
         IsAlive = false;
