@@ -652,6 +652,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slider: {fileID: 209307946}
+  playerMovement: {fileID: 4268597651635165}
 --- !u!114 &209307946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1680,6 +1681,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 815139280}
   m_CullTransparentMesh: 1
+--- !u!1 &866954846
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 866954848}
+  - component: {fileID: 866954847}
+  m_Layer: 0
+  m_Name: Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &866954847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 866954846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7c29cf76922c4b4585175671d17d67c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameover: {fileID: 640531259}
+  map: {fileID: 178004424}
+  spikePrefab: {fileID: 558287498582711571, guid: 8f445961f3af4734eab6b615aef5f1e5, type: 3}
+  spikes: []
+  heartScore: 0
+--- !u!4 &866954848
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 866954846}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 6.61, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &994974730
 GameObject:
   m_ObjectHideFlags: 0
@@ -3165,6 +3215,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2867655863257782822, guid: 20d918ad62c3b894a882b946e7e5a7e5, type: 3}
   m_PrefabInstance: {fileID: 1483633887198668584}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4268597651635165 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8128436547252775976, guid: 20d918ad62c3b894a882b946e7e5a7e5, type: 3}
+  m_PrefabInstance: {fileID: 1483633887198668584}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbbf195598aa2eb438928243a42961bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1483633887198668584
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3217,10 +3278,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Astronaut
       objectReference: {fileID: 0}
-    - target: {fileID: 8128436547252775976, guid: 20d918ad62c3b894a882b946e7e5a7e5, type: 3}
-      propertyPath: healthBar
-      value: 
-      objectReference: {fileID: 209307945}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3361,11 +3418,12 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 782799304}
+  - {fileID: 220340673}
   - {fileID: 350172592}
   - {fileID: 141349575}
   - {fileID: 178004429}
   - {fileID: 1706893818}
-  - {fileID: 220340673}
   - {fileID: 1483633887198668584}
   - {fileID: 8778987531413573389}
   - {fileID: 8060788390634839631}
+  - {fileID: 866954848}

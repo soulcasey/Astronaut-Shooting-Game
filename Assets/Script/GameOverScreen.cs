@@ -7,23 +7,15 @@ using UnityEngine.SceneManagement;
 public class GameOverScreen : MonoBehaviour
 {
     public Text scoreText;
-    public void Setup(int score)
+    public Button startButton;
+
+    public void Start()
     {
-        gameObject.SetActive(true);
-        scoreText.text = score.ToString();
+        startButton.onClick.AddListener(() => SceneManager.LoadScene(SceneManager.GetActiveScene().name));
     }
 
-    public Button yourButton;
-
-    void Start()
+    private void OnEnable()
     {
-        Button btn = yourButton.GetComponent<Button>();
-        btn.onClick.AddListener(TaskOnClick);
+        scoreText.text = GameManager.Instance.heartScore.ToString();
     }
-
-    void TaskOnClick()
-    {
-        SceneManager.LoadScene("GamePlay");
-    }
-
 }

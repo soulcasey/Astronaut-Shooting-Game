@@ -6,13 +6,13 @@ public class FollowPlayer : MonoBehaviour
 {
     public Transform player;
 
-    void Start()
+    private void Start()
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    void Update()
+    private void Update()
     {
         player.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
     }

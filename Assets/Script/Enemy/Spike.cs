@@ -1,66 +1,123 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Spike : MonoBehaviour
+public class Spike : MonoBehaviour, IDamageable
 {
+    private enum SpikeState { Grow, Fall, Grounded, Shrink }
+
+    private SpikeState currentState = SpikeState.Grow;
     private float hp = 3f;
-    private float fall = -4f;
-    private float appear;
-    private bool hit;
-    private bool down;
+
+    private const int FALL_SPEED = 4;
+    public const float SPAWN_INTERVAL_SECONDS = 0.7f;
+    private const float SPAWN_ZONE = 38f;
+    private const float SPAWN_HEIGHT = 20f;
+
+    private const int KNOCKBACK_FORCE = 500;
+    private const int HIT_DAMAGE = 10;
 
     private void Start()
     {
-        transform.position = new Vector3(Random.Range(-38.5f, 38.5f), 20, Random.Range(5f, 80f));
-        transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-        down = true;
+        transform.localScale = Vector3.one * 0.1f;
+        StartCoroutine(HandleState());
     }
 
-    public void Damaged (float damage)
+    public static Vector3 GetRandomPosition()
     {
-        hp -= damage;
+        return new Vector3(
+            Random.Range(-SPAWN_ZONE, SPAWN_ZONE),
+            SPAWN_HEIGHT,
+            Random.Range(-SPAWN_ZONE, SPAWN_ZONE)
+        );
     }
 
-    private void Update()
+    public void OnHit(float damage)
     {
-        if(transform.localScale.x < 2f && Time.time > appear && hp > 0f && down == true)
+        if (currentState != SpikeState.Fall) return;
+                
+        hp = Mathf.Max(0f, hp - damage);
+        
+        if (hp <= 0)
         {
-            transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
-            appear = Time.time + 0.01f;
-        }
-        if (transform.position.y > 0.5)
-        {
-            transform.Translate(0, Time.deltaTime * fall,0);
-            transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y + 0.1f, transform.eulerAngles.z);
-        }
-
-        if(transform.position.y <= 0.5)
-        {
-            down = false;
-        }
-
-
-        if (hp <= 0f || transform.position.y < -10f || hit == true)
-        {
-            down = false;
-            while (transform.localScale.x > 0.1f && Time.time > appear)
-            {
-                transform.localScale -= new Vector3(0.1f, 0.1f, 0.1f);
-                appear = Time.time + 0.005f;
-            }
-            if(transform.localScale.x <= 0.1f)
-            {
-                Destroy(gameObject);
-            }
+            TransitionTo(SpikeState.Shrink);
         }
     }
 
-    void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.tag == "Player")
+        if (collision.gameObject.CompareTag("Player") && collision.gameObject.TryGetComponent(out PlayerMovement playerMovement))
         {
-            hit = true;
+            playerMovement.ApplyKnockback(collision, KNOCKBACK_FORCE);
+            playerMovement.TakeDamage(HIT_DAMAGE);
+            TransitionTo(SpikeState.Shrink);
         }
+    }
+
+    private void TransitionTo(SpikeState newState)
+    {
+        StopAllCoroutines();
+        currentState = newState;
+        StartCoroutine(HandleState());
+    }
+
+    private IEnumerator HandleState()
+    {
+        switch (currentState)
+        {
+            case SpikeState.Grow:
+                yield return Grow();
+                TransitionTo(SpikeState.Fall);
+                break;
+
+            case SpikeState.Fall:
+                yield return Fall();
+                if (hp > 0f) TransitionTo(SpikeState.Grounded);
+                break;
+
+            case SpikeState.Grounded:
+                break;
+
+            case SpikeState.Shrink:
+                yield return ShrinkAndDestroy();
+                break;
+        }
+    }
+
+    private IEnumerator Grow()
+    {
+        while (transform.localScale.x < 2f)
+        {
+            transform.localScale += 2 * Time.deltaTime * Vector3.one;
+            yield return null;
+        }
+
+        transform.localScale = 2f * Vector3.one;
+    }
+
+    private IEnumerator Fall()
+    {
+        while (transform.position.y > 0.5f && hp > 0f)
+        {
+            transform.Translate(FALL_SPEED * Time.deltaTime * Vector3.down);
+            transform.Rotate(0f, 0.1f, 0f);
+
+            yield return null;
+        }
+
+        if (hp > 0)
+        {
+            transform.position = new Vector3(transform.position.x, 0.5f, transform.position.z);
+        }
+    }
+
+    private IEnumerator ShrinkAndDestroy()
+    {
+        while (transform.localScale.x > 0.1f)
+        {
+            transform.localScale -= 8f * Time.deltaTime * Vector3.one;
+            yield return null;
+        }
+
+        Destroy(gameObject);
     }
 }
