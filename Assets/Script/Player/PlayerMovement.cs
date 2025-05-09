@@ -20,17 +20,14 @@ public class PlayerMovement : MonoBehaviour
 
     private bool isGround = true;
 
-    [HideInInspector]
     public float CurrentHealth { get; private set; } = MAX_HEALTH;
     public const float MAX_HEALTH = 100;
 
     public ParticleSystem heartGainParticle;
 
     [Header("Audio")]
-    // public AudioSource heartSound;
-    // public AudioSource jumpSound;
-    // public AudioSource robotHitSound;
-    // public AudioSource spikeHitSound;
+    public AudioSource heartSound;
+    public AudioSource jumpSound;
 
     public bool IsAlive { get; private set; } = true;
 
@@ -68,7 +65,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && isGround)
         {
-            // jumpSound.Play();
+            jumpSound.Play();
             rb.AddForce(new Vector3(0, JUMP_FORCE, 0), ForceMode.Impulse);
             isGround = false;
         }
@@ -102,19 +99,22 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Spike") || collision.gameObject.CompareTag("Robot"))
+        if (collision.gameObject.CompareTag("Ground"))
         {
             isGround = true;
             anim.SetBool("Air", false);
             anim.SetFloat("AnimSpeed", 1f);
             anim.SetBool("Right", !anim.GetBool("Right"));
         }
-
-        if (collision.gameObject.CompareTag("Robot"))
+    }
+    
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
         {
-            // robotHitSound.Play();
-            CurrentHealth -= 30f;
-            ApplyKnockback(collision, 2000);
+            isGround = false;
+            anim.SetBool("Air", true);
+            anim.SetFloat("AnimSpeed", 0.4f);
         }
     }
 
@@ -124,16 +124,6 @@ public class PlayerMovement : MonoBehaviour
         float dirz = collision.contacts[0].point.z - transform.position.z;
         rb.linearVelocity = Vector3.zero;
         rb.AddForce(-dirx * force, 0, -dirz * force);
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGround = false;
-            anim.SetBool("Air", true);
-            anim.SetFloat("AnimSpeed", 0.4f);
-        }
     }
 
     // void PassiveDamage()

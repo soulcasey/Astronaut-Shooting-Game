@@ -21,7 +21,7 @@ public class GunShot : MonoBehaviour
         if (Time.time < lastFire + FIRE_RATE) return; 
         lastFire = Time.time;
 
-        // shootSound.Play();
+        shootSound.Play();
 
         foreach(var particle in flash)
         {

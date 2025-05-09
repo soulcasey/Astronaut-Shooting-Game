@@ -39,7 +39,7 @@ public class Spike : MonoBehaviour, IDamageable
         
         if (hp <= 0)
         {
-            TransitionTo(SpikeState.Shrink);
+            ChangeState(SpikeState.Shrink);
         }
     }
 
@@ -49,11 +49,11 @@ public class Spike : MonoBehaviour, IDamageable
         {
             playerMovement.ApplyKnockback(collision, KNOCKBACK_FORCE);
             playerMovement.TakeDamage(HIT_DAMAGE);
-            TransitionTo(SpikeState.Shrink);
+            ChangeState(SpikeState.Shrink);
         }
     }
 
-    private void TransitionTo(SpikeState newState)
+    private void ChangeState(SpikeState newState)
     {
         StopAllCoroutines();
         currentState = newState;
@@ -66,12 +66,12 @@ public class Spike : MonoBehaviour, IDamageable
         {
             case SpikeState.Grow:
                 yield return Grow();
-                TransitionTo(SpikeState.Fall);
+                ChangeState(SpikeState.Fall);
                 break;
 
             case SpikeState.Fall:
                 yield return Fall();
-                if (hp > 0f) TransitionTo(SpikeState.Grounded);
+                if (hp > 0f) ChangeState(SpikeState.Grounded);
                 break;
 
             case SpikeState.Grounded:
@@ -115,6 +115,13 @@ public class Spike : MonoBehaviour, IDamageable
         while (transform.localScale.x > 0.1f)
         {
             transform.localScale -= 8f * Time.deltaTime * Vector3.one;
+
+            if (transform.localScale.x < 0.1f)
+            {
+                transform.localScale = Vector3.one * 0.1f;
+                break;
+            }
+
             yield return null;
         }
 

@@ -30,6 +30,7 @@ public class Heart: MonoBehaviour
     {
         if (collider.gameObject.CompareTag("Player") && collider.TryGetComponent(out PlayerMovement playerMovement))
         {
+            playerMovement.heartSound.Play();
             playerMovement.heartGainParticle.Play();
             playerMovement.Heal(HEAL_AMOUNT);
 

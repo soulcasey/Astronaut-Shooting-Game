@@ -2,104 +2,109 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RobotMovement : MonoBehaviour
+public class RobotMovement : MonoBehaviour, IDamageable
 {
-    public Transform Player;
-    private int MoveSpeed = 9;
-    public RobotHealthBar healthBar;
+    private enum RobotState { Off, On, Idle, Chase }
+    private RobotState currentState = RobotState.Off;
 
+    public Transform target;
+    public Animator anim;
+    
+    public AudioSource startSound;
+    public AudioSource stopSound;
+    public AudioSource attackSound;
 
-    private float hp;
-    private float spawn;
-    private float begin;
-    private bool open;
-    private float walk;
+    public float CurrentHealth { get; private set; } = MAX_HEALTH;
+    public const float MAX_HEALTH = 30f;
+    
+    private const int MOVEMENT_SPEED = 9;
+    private const float OFF_DURATION = 10f;
+    private const float ON_DURATION = 4f;
 
-    Animator anim;
+    private const int KNOCKBACK_FORCE = 2000;
+    private const int HIT_DAMAGE = 30;
 
-    private AudioSource walkSound;
-    public GameObject ground;
-
-    public GameObject start;
-    public GameObject stop;
-    private AudioSource startSound;
-    private AudioSource stopSound;
-    private bool stopping;
-
-    void Start()
+    private void Start()
     {
-        anim = gameObject.GetComponent<Animator>();
-        hp = 30f;
-        healthBar.SetMaxHealth(hp);
-        begin = Time.time;
-        open = false;
-        walkSound = ground.GetComponent<AudioSource>();
-        startSound = start.GetComponent<AudioSource>();
-        stopSound = stop.GetComponent<AudioSource>();
-        startSound.Play();
-        stopping = true;
+        ChangeState(RobotState.On);
     }
 
-    void Update()
+    private void ChangeState(RobotState newState)
     {
-        if (hp > 0f)
-        {
-            stopping = true;
-            anim.SetBool("Open_Anim", true);
-            if (Time.time > begin + 4f)
-            {
-                open = true;
-                walk = Time.time;
-            }
-            if(open == false)
-            {
-                hp = 30f;
-            }
-            if (open == true)
-            {
-                if (Time.time > walk)
-                {
-                    walk = Time.time + 1f;
-                    walkSound.Play();
-                }
-                Vector3 target = new Vector3(Player.transform.position.x, transform.position.y, Player.transform.position.z);
-                transform.LookAt(target);
-                transform.position += transform.forward * MoveSpeed * Time.deltaTime;
-                anim.SetBool("Walk_Anim", true);
-                spawn = Time.time;
-            }
-        }
+        StopAllCoroutines();
+        currentState = newState;
+        StartCoroutine(HandleState());
+    }
 
-
-        if (hp <= 0f)
+    private IEnumerator HandleState()
+    {
+        switch (currentState)
         {
-            if(stopping == true)
-            {
+            case RobotState.Off:
                 stopSound.Play();
-                stopping = false;
-            }
-            
-            open = false;
-            anim.SetBool("Walk_Anim", false);
-            anim.SetBool("Open_Anim", false);
-            if (Time.time > spawn + 10)
-            {
-                begin = Time.time;
-                hp = 30f;
+                anim.SetBool("Walk_Anim", false);
+                anim.SetBool("Open_Anim", false);
+
+                yield return new WaitForSeconds(OFF_DURATION);
+                
+                ChangeState(RobotState.On);
+                break;
+
+            case RobotState.On:
                 startSound.Play();
-            }
+                anim.SetBool("Open_Anim", true);
+
+                yield return new WaitForSeconds(ON_DURATION);
+
+                CurrentHealth = MAX_HEALTH;
+
+                ChangeState(RobotState.Idle);
+                break;
+
+            // Later on, Idle will be set if player is not within Robot's boundary
+            // For now, always chase.
+            case RobotState.Idle:
+                ChangeState(RobotState.Chase);
+                break;
+
+            case RobotState.Chase:
+                anim.SetBool("Walk_Anim", true);
+                yield return ChaseTarger();
+                break;
         }
-
     }
 
-    private void FixedUpdate()
+    private IEnumerator ChaseTarger()
     {
-        healthBar.SetHealth(hp);
+        while (currentState == RobotState.Chase && CurrentHealth > 0f)
+        {
+            Vector3 targetPosition = new Vector3(target.position.x, transform.position.y, target.position.z);
+            transform.LookAt(targetPosition);
+            transform.position += MOVEMENT_SPEED * Time.deltaTime * transform.forward;
+
+            yield return null;
+        }
     }
 
-    public void Damaged(float damage)
+    public void OnHit(float damage)
     {
-        hp -= damage;
+        if (currentState != RobotState.Idle && currentState != RobotState.Chase) return;
+                
+        CurrentHealth = Mathf.Max(0f, CurrentHealth - damage);
+        
+        if (CurrentHealth <= 0)
+        {
+            ChangeState(RobotState.Off);
+        }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player") && collision.gameObject.TryGetComponent(out PlayerMovement playerMovement))
+        {
+            attackSound.Play();
+            playerMovement.ApplyKnockback(collision, KNOCKBACK_FORCE);
+            playerMovement.TakeDamage(HIT_DAMAGE);
+        }
+    }
 }

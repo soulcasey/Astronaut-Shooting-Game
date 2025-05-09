@@ -12,13 +12,18 @@ public class TimeScore : MonoBehaviour
         StartCoroutine(UpdateTime());
     }
 
+    public string GetFormattedTime()
+    {
+        int minutes = ElapsedSeconds / 60;
+        int seconds = ElapsedSeconds % 60;
+        return minutes.ToString() + ":" + seconds.ToString("D2");
+    }
+
     private IEnumerator UpdateTime()
     {
         while (true)
         {
-            int minutes = ElapsedSeconds / 60;
-            int seconds = ElapsedSeconds % 60;
-            timeText.text = minutes.ToString() + ":" + seconds.ToString("D2");
+            timeText.text = GetFormattedTime();
 
             yield return new WaitForSeconds(1f);
             ElapsedSeconds++;

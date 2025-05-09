@@ -6,7 +6,10 @@ using UnityEngine.SceneManagement;
 
 public class GameOverScreen : MonoBehaviour
 {
-    public Text scoreText;
+    public Text heartText;
+    public Text timeText;
+
+    public TimeScore timeScore;
     public Button startButton;
 
     public void Start()
@@ -16,6 +19,7 @@ public class GameOverScreen : MonoBehaviour
 
     private void OnEnable()
     {
-        scoreText.text = GameManager.Instance.heartScore.ToString();
+        heartText.text = GameManager.Instance.heartScore.ToString();
+        timeText.text = timeScore.GetFormattedTime();
     }
 }
