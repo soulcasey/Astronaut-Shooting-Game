@@ -4,16 +4,7 @@ using UnityEngine;
 
 public class GunShot : MonoBehaviour
 {
-    Ray ray;
-    RaycastHit hit;
-
-    private AudioSource shootSound;
-
-    public Camera cam;
-    public float fire;
-    private float nextfire;
-    private float damage = 1f;
-
+    public AudioSource shootSound;
 
     public GameObject muzzle;
 
@@ -21,50 +12,36 @@ public class GunShot : MonoBehaviour
     public ParticleSystem splash;
     public TrailRenderer trace;
 
-    public PlayerMovement player;
+    private float lastFire = -Mathf.Infinity;
+    private const float FIRE_RATE = 0.15f;
+    private const float FIRE_DAMAGE = 1f;
 
-    void Start()
+    public void Shoot()
     {
-        shootSound = GetComponent<AudioSource>();
-    }
+        if (Time.time < lastFire + FIRE_RATE) return; 
+        lastFire = Time.time;
 
-    void Update()
-    {
-        if (Input.GetButton("Fire1") && Time.time > nextfire && player.dead == false)
-        {
-            nextfire = Time.time + fire;
-            Shoot();
-        }
-    }
+        // shootSound.Play();
 
-    void Shoot()
-    {
-        shootSound.Play();
         foreach(var particle in flash)
         {
             particle.Emit(1);
         }
 
-        ray.origin = cam.transform.position;
+        Camera cam = Camera.main;
+
+        Vector3 origin = cam.transform.position;
+        Vector3 direction = cam.transform.forward;
 
         var tracer = Instantiate(trace, muzzle.transform.position, Quaternion.identity);
         tracer.AddPosition(muzzle.transform.position);
 
-        if (Physics.Raycast(ray.origin, cam.transform.forward, out hit))
+        if (Physics.Raycast(origin, direction, out RaycastHit hit))
         {
-            Enemy enemy = hit.transform.GetComponent<Enemy>();
-            if(enemy != null && enemy.transform.position.y > 0.5)
+            if (hit.collider.TryGetComponent(out IDamageable damageable) == true)
             {
-                enemy.Damaged(damage);
+                damageable.OnHit(FIRE_DAMAGE);
             }
-
-            RobotMovement robot = hit.transform.GetComponent<RobotMovement>();
-            if (robot != null)
-            {
-                robot.Damaged(damage);
-            }
-
-            Debug.DrawLine(muzzle.transform.position, hit.point, Color.red, 1.0f);
 
             splash.transform.position = hit.point;
             splash.transform.forward = hit.normal;
@@ -72,12 +49,13 @@ public class GunShot : MonoBehaviour
 
             tracer.transform.position = hit.point;
         }
-
         else
         {
-            Debug.DrawLine(muzzle.transform.position, ray.origin + cam.transform.forward * 100, Color.blue, 1.0f);
-            tracer.transform.position = ray.origin + cam.transform.forward * 100;
+            tracer.transform.position = origin + direction * 100;
         }
 
+        Debug.DrawLine(muzzle.transform.position, tracer.transform.position, Color.blue, 1.0f);
+
+        Destroy(tracer.gameObject, 1f);
     }
 }

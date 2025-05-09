@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Spike : MonoBehaviour
 {
     private float hp = 3f;
     private float fall = -4f;
