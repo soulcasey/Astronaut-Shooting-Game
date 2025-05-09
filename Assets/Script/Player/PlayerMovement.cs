@@ -46,6 +46,8 @@ public class PlayerMovement : MonoBehaviour
 
         HandleShooting();
 
+        CheckStatus();
+
         //PassiveDamage();
     }
 
@@ -64,6 +66,13 @@ public class PlayerMovement : MonoBehaviour
             anim.SetInteger(ANIMATION_KEY, 0);
         }
 
+        if (Input.GetKeyDown(KeyCode.Space) && ground)
+        {
+            // jumpSound.Play();
+            rb.AddForce(new Vector3(0, JUMP_FORCE, 0), ForceMode.Impulse);
+            ground = false;
+        }
+
         transform.Translate(Input.GetAxis("Horizontal") * Time.deltaTime * MOVEMENT_SPEED, 0, Input.GetAxis("Vertical") * Time.deltaTime * MOVEMENT_SPEED);
     }
     private void HandleShooting()
@@ -71,16 +80,9 @@ public class PlayerMovement : MonoBehaviour
        if (Input.GetKey(KeyCode.Mouse0)) gunShot.Shoot();
     }
 
-    private void FixedUpdate()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) && ground)
-        {
-            
-            ground = false;
-            // jumpSound.Play();
-            rb.AddForce(new Vector3(0, JUMP_FORCE, 0), ForceMode.Impulse);
-        }
 
+    private void CheckStatus()
+    {
         if (gameObject.transform.position.y < -30 || CurrentHealth <= 0)
         {
             Death();
