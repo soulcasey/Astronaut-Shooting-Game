@@ -42,8 +42,8 @@ public class GameStartScreen : MonoBehaviour
         float startX = isLeftToRight ? -12f : 12f;
         float endX = isLeftToRight ? 12f : -12f;
 
-        float startY = Random.Range(-6.5f, 6.5f);
-        float endY = Random.Range(-6.5f, 6.5f);
+        float startY = Random.Range(-4.5f, 4.5f);
+        float endY = Random.Range(-4.5f, 4.5f);
 
         Vector3 startPos = new Vector3(startX, startY, 0f);
         endPos = new Vector3(endX, endY, 0f);
