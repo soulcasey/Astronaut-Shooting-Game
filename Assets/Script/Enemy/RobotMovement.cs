@@ -104,6 +104,7 @@ public class RobotMovement : MonoBehaviour, IDamageable
         
         if (CurrentHealth <= 0)
         {
+            GameManager.Instance.KillScore ++;
             ChangeState(RobotState.Off);
         }
     }

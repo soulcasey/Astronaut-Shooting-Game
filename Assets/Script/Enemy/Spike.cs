@@ -50,6 +50,7 @@ public class Spike : MonoBehaviour, IDamageable
         
         if (hp <= 0)
         {
+            GameManager.Instance.SpikeScore ++;
             ChangeState(SpikeState.Shrink);
         }
     }

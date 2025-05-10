@@ -18,8 +18,22 @@ public class GameManager : SingletonBase<GameManager>
     public List<Spike> spikes = new List<Spike>();
     private const int PASSIVE_DAMAGE = 2;
 
+    
+    public Text killScoreText;
     public Text heartScoreText;
+    public Text SpikeScoreText;
 
+    private int killScore;
+    public int KillScore
+    {
+        get { return killScore; }
+        set
+        {
+            killScore = value;
+            killScoreText.text = killScore.ToString();
+        }
+    }
+    
     private int heartScore;
     public int HeartScore
     {
@@ -28,6 +42,17 @@ public class GameManager : SingletonBase<GameManager>
         {
             heartScore = value;
             heartScoreText.text = heartScore.ToString();
+        }
+    }
+
+    private int spikeScore;
+    public int SpikeScore
+    {
+        get { return spikeScore; }
+        set
+        {
+            spikeScore = value;
+            SpikeScoreText.text = spikeScore.ToString();
         }
     }
 
@@ -45,7 +70,7 @@ public class GameManager : SingletonBase<GameManager>
     {
         while(true)
         {
-            spikes.Add(Instantiate(spikePrefab, Spike.GetRandomPosition(), Quaternion.identity));
+            spikes.Add(Instantiate(spikePrefab, Spike.GetRandomPosition(), Quaternion.identity, transform));
 
             yield return new WaitForSeconds(Spike.SPAWN_INTERVAL_SECONDS);
         }

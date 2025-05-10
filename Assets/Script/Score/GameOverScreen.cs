@@ -6,7 +6,9 @@ using UnityEngine.SceneManagement;
 
 public class GameOverScreen : MonoBehaviour
 {
+    public Text killText;
     public Text heartText;
+    public Text spikeText;
     public Text timeText;
 
     public TimeScore timeScore;
@@ -19,7 +21,9 @@ public class GameOverScreen : MonoBehaviour
 
     private void OnEnable()
     {
+        killText.text = GameManager.Instance.KillScore.ToString();
         heartText.text = GameManager.Instance.HeartScore.ToString();
+        spikeText.text = GameManager.Instance.SpikeScore.ToString();
         timeText.text = timeScore.GetFormattedTime();
     }
 }
