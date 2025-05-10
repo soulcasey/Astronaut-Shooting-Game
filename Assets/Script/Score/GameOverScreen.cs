@@ -14,13 +14,15 @@ public class GameOverScreen : MonoBehaviour
     public TimeScore timeScore;
     public Button startButton;
 
-    public void Start()
+    private void Start()
     {
         startButton.onClick.AddListener(() => SceneManager.LoadScene(SceneManager.GetActiveScene().name));
     }
 
     private void OnEnable()
     {
+        GameManager.Instance.PauseGame(true);
+
         killText.text = GameManager.Instance.KillScore.ToString();
         heartText.text = GameManager.Instance.HeartScore.ToString();
         spikeText.text = GameManager.Instance.SpikeScore.ToString();

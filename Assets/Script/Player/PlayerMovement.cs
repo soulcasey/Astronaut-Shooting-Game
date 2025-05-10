@@ -62,7 +62,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        if (IsAlive == false) return;
+        if (IsAlive == false || GameManager.Instance.IsPaused == true) return;
 
         PlayerRotation();
 
