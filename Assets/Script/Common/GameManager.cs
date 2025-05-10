@@ -16,8 +16,6 @@ public class GameManager : SingletonBase<GameManager>
     [Header("Spike")]
     public Spike spikePrefab;
     public List<Spike> spikes = new List<Spike>();
-    private Coroutine spikeSpawnCoroutine;
-    private Coroutine passiveDamageCoroutine;
     private const int PASSIVE_DAMAGE = 2;
 
     public Text heartScoreText;
@@ -39,8 +37,8 @@ public class GameManager : SingletonBase<GameManager>
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
         
-        spikeSpawnCoroutine = StartCoroutine(SpikeSpawnCoroutine());
-        passiveDamageCoroutine = StartCoroutine(PassiveDamageCoroutine());
+        StartCoroutine(SpikeSpawnCoroutine());
+        StartCoroutine(PassiveDamageCoroutine());
     }
 
     private IEnumerator SpikeSpawnCoroutine()

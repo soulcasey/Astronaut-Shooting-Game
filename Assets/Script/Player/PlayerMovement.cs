@@ -13,7 +13,6 @@ public enum PlayerAnimation
     Roll
 }
 
-
 public enum PlayerStatus
 {
     Active,
@@ -29,6 +28,7 @@ public class PlayerMovement : MonoBehaviour
     public Animator anim;
 
     public GunShot gunShot;
+    private bool isShooting = false;
 
     private bool isGround = true;
 
@@ -45,8 +45,8 @@ public class PlayerMovement : MonoBehaviour
     private bool isRolling = false;
     private Coroutine rollCoroutine;
     private bool canRoll = true;
-    private const float ROLL_COOLDOWN = 1.2f;
-    private const float ROLL_DURATION = 0.6f;
+    private const float ROLL_COOLDOWN = 1f;
+    private const float ROLL_DURATION = 0.5f;
     private const float ROLL_FORCE = 18f;
 
     public bool IsAlive { get; private set; } = true;
@@ -73,10 +73,28 @@ public class PlayerMovement : MonoBehaviour
         CheckStatus();
     }
 
+    private Vector3 GetInputDirection()
+    {
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
+
+        Vector3 camForward = mainCamera.transform.forward;
+        Vector3 camRight = mainCamera.transform.right;
+        camForward.y = 0f;
+        camRight.y = 0f;
+        camForward.Normalize();
+        camRight.Normalize();
+
+        return (camForward * v + camRight * h).normalized;
+    }
+
     private void HandleMovement()
     {
         if (isRolling || !IsAlive) return;
+        
+        Vector3 moveDirection = GetInputDirection();
 
+        // Play animations
         if (isGround)
         {
             if (Input.GetKeyDown(KeyCode.Mouse1) && canRoll)
@@ -87,7 +105,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 anim.SetInteger(ANIMATION_KEY, (int)PlayerAnimation.Backward);
             }
-            else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+            else if (moveDirection != Vector3.zero)
             {
                 anim.SetInteger(ANIMATION_KEY, (int)PlayerAnimation.Walk);
             }
@@ -97,6 +115,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
+        // Jump
         if (Input.GetKeyDown(KeyCode.Space) && isGround)
         {
             jumpSound.Play();
@@ -104,12 +123,18 @@ public class PlayerMovement : MonoBehaviour
             isGround = false;
         }
 
-        transform.Translate(Input.GetAxis("Horizontal") * Time.deltaTime * MOVEMENT_SPEED, 0, Input.GetAxis("Vertical") * Time.deltaTime * MOVEMENT_SPEED);
+        transform.Translate(moveDirection * Time.deltaTime * MOVEMENT_SPEED, Space.World);
+
+        if (moveDirection != Vector3.zero && !isShooting)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
+        }
     }
 
     private void PlayerRotation()
     {
-        if (isRolling == true) return;
+        if (isShooting == false) return;
         transform.rotation = Quaternion.Euler(0, mainCamera.transform.rotation.eulerAngles.y, 0);
     }
 
@@ -119,24 +144,23 @@ public class PlayerMovement : MonoBehaviour
 
         isRolling = true;
 
-        Vector3 inputDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
+        Vector3 moveDirection = GetInputDirection();
 
-        if (inputDirection == Vector3.zero)
+        // Default forward if no input
+        if (moveDirection == Vector3.zero)
         {
-            inputDirection = Vector3.forward; // Default forward if no input
+            moveDirection = transform.forward;
         }
 
-        Vector3 rollDirection = transform.TransformDirection(inputDirection);
-
         // Face the roll direction
-        transform.rotation = Quaternion.LookRotation(rollDirection);
+        transform.rotation = Quaternion.LookRotation(moveDirection);
 
         anim.SetInteger(ANIMATION_KEY, (int)PlayerAnimation.Roll);
 
         float elapsed = 0f;
         while (elapsed < ROLL_DURATION)
         {
-            transform.Translate(rollDirection * Time.deltaTime * ROLL_FORCE, Space.World);
+            transform.Translate(moveDirection * Time.deltaTime * ROLL_FORCE, Space.World);
             elapsed += Time.deltaTime;
             yield return null;
         }
@@ -153,7 +177,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleShooting()
     {
-       if (Input.GetKey(KeyCode.Mouse0) && !isRolling) gunShot.Shoot();
+        if(Input.GetKey(KeyCode.Mouse0) && !isRolling)
+        {
+            isShooting = true;
+            gunShot.Shoot();
+        }
+        else
+        {
+            isShooting = false;
+        }
     }
 
     private void CheckStatus()
