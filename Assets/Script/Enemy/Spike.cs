@@ -10,6 +10,10 @@ public class Spike : MonoBehaviour, IDamageable
     private Coroutine stateCoroutine;
     private float hp = 3f;
 
+    public GameObject needle;
+    public Collider innerCollider;
+    public Collider outerCollider;
+
     private Outline outline;
     private Coroutine outlineCoroutine;
 
@@ -24,12 +28,17 @@ public class Spike : MonoBehaviour, IDamageable
     private void Start()
     {
         transform.localScale = Vector3.one * 0.1f;
-        StartCoroutine(HandleState());
-
+        needle.transform.localScale = Vector3.one * 0.1f;
+        needle.SetActive(false);
+        innerCollider.enabled = true;
+        outerCollider.enabled = false;
+    
         outline = gameObject.AddComponent<Outline>();
         outline.enabled = false;
         outline.OutlineWidth = 10;
         outline.OutlineColor = Color.red;
+
+        StartCoroutine(HandleState());
     }
 
     public static Vector3 GetRandomPosition()
@@ -50,12 +59,15 @@ public class Spike : MonoBehaviour, IDamageable
         
         if (hp <= 0)
         {
+            GameManager.Instance.SpikeScore ++;
             ChangeState(SpikeState.Shrink);
         }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (currentState != SpikeState.Fall && currentState != SpikeState.Grounded) return;
+
         if (collision.gameObject.CompareTag("Player") && collision.gameObject.TryGetComponent(out PlayerMovement playerMovement))
         {
             hitSound.Play();
@@ -87,6 +99,10 @@ public class Spike : MonoBehaviour, IDamageable
                 break;
 
             case SpikeState.Grounded:
+                needle.SetActive(true);
+                innerCollider.enabled = false;
+                outerCollider.enabled = true;
+                yield return NeedleOut();
                 break;
 
             case SpikeState.Shrink:
@@ -120,6 +136,18 @@ public class Spike : MonoBehaviour, IDamageable
         {
             transform.position = new Vector3(transform.position.x, 0.5f, transform.position.z);
         }
+    }
+
+    private IEnumerator NeedleOut()
+    {
+        while (needle.transform.localScale.x < 1f)
+        {
+            needle.transform.localScale += 4.5f * Time.deltaTime * Vector3.one;
+
+            yield return null;
+        }
+
+        needle.transform.localScale = Vector3.one;
     }
 
     private IEnumerator ShrinkAndDestroy()

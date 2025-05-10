@@ -28,6 +28,8 @@ public class RobotMovement : MonoBehaviour, IDamageable
     private const int KNOCKBACK_FORCE = 2000;
     private const int HIT_DAMAGE = 30;
 
+    private const int BOUNDARY = 39;
+
     private void Start()
     {
         ChangeState(RobotState.On);
@@ -70,10 +72,9 @@ public class RobotMovement : MonoBehaviour, IDamageable
                 ChangeState(RobotState.Idle);
                 break;
 
-            // Later on, Idle will be set if player is not within Robot's boundary
-            // For now, always chase.
             case RobotState.Idle:
-                ChangeState(RobotState.Chase);
+                anim.SetBool("Walk_Anim", false);
+                yield return ScanTarget();
                 break;
 
             case RobotState.Chase:
@@ -83,13 +84,42 @@ public class RobotMovement : MonoBehaviour, IDamageable
         }
     }
 
+    private IEnumerator ScanTarget()
+    {
+        while (currentState == RobotState.Idle && CurrentHealth > 0f)
+        {
+            Vector3 targetPosition = new Vector3(target.position.x, transform.position.y, target.position.z);
+            Vector3 direction = (targetPosition - transform.position).normalized;
+            Vector3 nextPosition = transform.position + direction * MOVEMENT_SPEED * Time.deltaTime;
+
+            if (IsWithinBoundary(nextPosition))
+            {
+                ChangeState(RobotState.Chase);
+                yield break;
+            }
+
+            yield return null;
+        }
+    }
+
     private IEnumerator ChaseTarger()
     {
         while (currentState == RobotState.Chase && CurrentHealth > 0f)
         {
             Vector3 targetPosition = new Vector3(target.position.x, transform.position.y, target.position.z);
-            transform.LookAt(targetPosition);
-            transform.position += MOVEMENT_SPEED * Time.deltaTime * transform.forward;
+            Vector3 direction = (targetPosition - transform.position).normalized;
+            Vector3 nextPosition = transform.position + direction * MOVEMENT_SPEED * Time.deltaTime;
+
+            if (IsWithinBoundary(nextPosition))
+            {
+                transform.LookAt(targetPosition);
+                transform.position = nextPosition;
+            }
+            else
+            {
+                ChangeState(RobotState.Idle);
+                yield break;
+            }
 
             yield return null;
         }
@@ -104,6 +134,7 @@ public class RobotMovement : MonoBehaviour, IDamageable
         
         if (CurrentHealth <= 0)
         {
+            GameManager.Instance.KillScore ++;
             ChangeState(RobotState.Off);
         }
     }
@@ -132,5 +163,10 @@ public class RobotMovement : MonoBehaviour, IDamageable
         outline.enabled = true;
         yield return new WaitForSeconds(0.2f);
         outline.enabled = false;
+    }
+
+    private bool IsWithinBoundary(Vector3 position)
+    {
+        return position.x >= -BOUNDARY && position.x <= BOUNDARY && position.z >= -BOUNDARY && position.z <= BOUNDARY;
     }
 }
