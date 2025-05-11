@@ -23,6 +23,7 @@ public class AudioManager : SingletonBase<AudioManager>
         if (PlayerPrefs.HasKey(VOLUME_PLAYERPREF) == false)
         {
             PlayerPrefs.SetFloat(VOLUME_PLAYERPREF, DEFAULT_VOLUME);
+            PlayerPrefs.Save();
         }
 
         AudioListener.volume = PlayerPrefs.GetFloat(VOLUME_PLAYERPREF, DEFAULT_VOLUME);
@@ -30,8 +31,9 @@ public class AudioManager : SingletonBase<AudioManager>
 
     public void SetVolume(float volume)
     {
-        float newVolume = Math.Min(volume * MAX_VOLUME, MAX_VOLUME);
+        float newVolume = Mathf.Min(volume, MAX_VOLUME);
         AudioListener.volume = newVolume;
         PlayerPrefs.SetFloat(VOLUME_PLAYERPREF, newVolume);
+        PlayerPrefs.Save();
     }
 }
