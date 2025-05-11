@@ -2830,6 +2830,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1075459337}
   - component: {fileID: 1075459336}
+  - component: {fileID: 1075459338}
   m_Layer: 0
   m_Name: SpikeManager
   m_TagString: Untagged
@@ -2849,7 +2850,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7907d6e6139d4c640a6d55cba104ecb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab: {fileID: 558287498582711571, guid: 8f445961f3af4734eab6b615aef5f1e5, type: 3}
+  objectPool: {fileID: 1075459338}
 --- !u!4 &1075459337
 Transform:
   m_ObjectHideFlags: 0
@@ -2865,6 +2866,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1075459338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1075459335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cbf41f660b6f394994fed97dbf61a99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 558287498582711571, guid: 8f445961f3af4734eab6b615aef5f1e5, type: 3}
 --- !u!1 &1087386968
 GameObject:
   m_ObjectHideFlags: 0

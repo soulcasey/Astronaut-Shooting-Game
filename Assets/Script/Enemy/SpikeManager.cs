@@ -1,8 +1,10 @@
 using System.Collections;
 using UnityEngine;
 
-public class SpikeManager : ObjectPool<Spike>
+public class SpikeManager : SingletonBase<SpikeManager>
 {
+    public SpikeObjectPool objectPool;
+
     private const float SPAWN_INTERVAL_SECONDS = 0.7f;    
     private const float SPAWN_ZONE = 38f;
     private const float SPAWN_HEIGHT = 20f;
@@ -17,7 +19,7 @@ public class SpikeManager : ObjectPool<Spike>
     {
         while(true)
         {
-            Spike spike = Get();
+            Spike spike = objectPool.Get();
             spike.transform.position = GetRandomPosition();
 
             yield return new WaitForSeconds(SPAWN_INTERVAL_SECONDS);
@@ -33,7 +35,4 @@ public class SpikeManager : ObjectPool<Spike>
             Random.Range(-SPAWN_ZONE, SPAWN_ZONE)
         );
     }
-
-
-    protected override int InitialSize => 10;
 }

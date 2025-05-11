@@ -23,7 +23,7 @@ public class Spike : MonoBehaviour, IDamageable, IPoolable
     private const int HIT_DAMAGE = 10;
     private const float MAX_HEALTH = 3f;
 
-    public void Init()
+    public void InitPoolObject()
     {
         hp = MAX_HEALTH;
         transform.localScale = Vector3.one * 0.1f;
@@ -153,7 +153,7 @@ public class Spike : MonoBehaviour, IDamageable, IPoolable
             yield return null;
         }
 
-        SpikeManager.Instance.Return(this);
+        SpikeManager.Instance.objectPool.Return(this);
     }
 
     private void HitOutline()
@@ -172,7 +172,7 @@ public class Spike : MonoBehaviour, IDamageable, IPoolable
         outline.enabled = false;
     }
 
-    public void Reset()
+    public void ResetPoolObject()
     {
         StopAllCoroutines();
     }

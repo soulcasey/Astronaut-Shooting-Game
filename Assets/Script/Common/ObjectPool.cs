@@ -3,11 +3,11 @@ using UnityEngine;
 
 public interface IPoolable
 {
-    public void Init();
-    public void Reset();
+    public void InitPoolObject();
+    public void ResetPoolObject();
 }
 
-public abstract class ObjectPool<T> : SingletonBase<ObjectPool<T>> where T : MonoBehaviour, IPoolable
+public abstract class ObjectPool<T> : MonoBehaviour where T : MonoBehaviour, IPoolable
 {
     [SerializeField]
     private T prefab;
@@ -15,10 +15,8 @@ public abstract class ObjectPool<T> : SingletonBase<ObjectPool<T>> where T : Mon
 
     private readonly Queue<T> pool = new Queue<T>();
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
-
         for (int i = 0; i < InitialSize; i++)
         {
             AddObjectToPool();
@@ -38,14 +36,14 @@ public abstract class ObjectPool<T> : SingletonBase<ObjectPool<T>> where T : Mon
 
         T obj = pool.Dequeue();
         obj.gameObject.SetActive(true);
-        obj.Init();
+        obj.InitPoolObject();
         return obj;
     }
 
     public virtual void Return(T obj)
     {
         obj.gameObject.SetActive(false);
-        obj.Reset();
+        obj.ResetPoolObject();
         pool.Enqueue(obj);
     }
 }
