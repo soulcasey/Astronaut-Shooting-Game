@@ -31,7 +31,7 @@ public class AudioManager : SingletonBase<AudioManager>
 
     public void SetVolume(float volume)
     {
-        float newVolume = Mathf.Min(volume * MAX_VOLUME, MAX_VOLUME);
+        float newVolume = Mathf.Min(volume, MAX_VOLUME);
         AudioListener.volume = newVolume;
         PlayerPrefs.SetFloat(VOLUME_PLAYERPREF, newVolume);
         PlayerPrefs.Save();
