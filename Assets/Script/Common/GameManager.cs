@@ -17,9 +17,6 @@ public class GameManager : SingletonBase<GameManager>
 
     [Header("Player")]
     public PlayerMovement player;
-
-    [Header("Spike")]
-    public Spike spikePrefab;
     private const int PASSIVE_DAMAGE = 2;
 
     
@@ -66,7 +63,6 @@ public class GameManager : SingletonBase<GameManager>
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
         
-        StartCoroutine(SpikeSpawnCoroutine());
         StartCoroutine(PassiveDamageCoroutine());
     }
 
@@ -78,15 +74,6 @@ public class GameManager : SingletonBase<GameManager>
         }
     }
 
-    private IEnumerator SpikeSpawnCoroutine()
-    {
-        while(true)
-        {
-            Instantiate(spikePrefab, Spike.GetRandomPosition(), Quaternion.identity, transform);
-
-            yield return new WaitForSeconds(Spike.SPAWN_INTERVAL_SECONDS);
-        }
-    }
 
     private IEnumerator PassiveDamageCoroutine()
     {

@@ -2704,7 +2704,7 @@ GameObject:
   - component: {fileID: 866954848}
   - component: {fileID: 866954847}
   m_Layer: 0
-  m_Name: Manager
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2727,7 +2727,6 @@ MonoBehaviour:
   pause: {fileID: 608320920}
   map: {fileID: 178004424}
   player: {fileID: 4268597651635165}
-  spikePrefab: {fileID: 558287498582711571, guid: 8f445961f3af4734eab6b615aef5f1e5, type: 3}
   killScoreText: {fileID: 2129470954}
   heartScoreText: {fileID: 1148317294}
   SpikeScoreText: {fileID: 453437695}
@@ -2821,6 +2820,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 994974730}
   m_CullTransparentMesh: 1
+--- !u!1 &1075459335
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1075459337}
+  - component: {fileID: 1075459336}
+  m_Layer: 0
+  m_Name: SpikeManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1075459336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1075459335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7907d6e6139d4c640a6d55cba104ecb5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 558287498582711571, guid: 8f445961f3af4734eab6b615aef5f1e5, type: 3}
+--- !u!4 &1075459337
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1075459335}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1087386968
 GameObject:
   m_ObjectHideFlags: 0
@@ -5203,3 +5247,4 @@ SceneRoots:
   - {fileID: 8778987531413573389}
   - {fileID: 8060788390634839631}
   - {fileID: 866954848}
+  - {fileID: 1075459337}

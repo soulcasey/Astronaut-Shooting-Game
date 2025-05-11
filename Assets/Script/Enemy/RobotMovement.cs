@@ -15,7 +15,7 @@ public class RobotMovement : MonoBehaviour, IDamageable
     public AudioSource stopSound;
     public AudioSource attackSound;
 
-    private Outline outline;
+    public Outline outline;
     private Coroutine outlineCoroutine;
 
     public float CurrentHealth { get; private set; } = MAX_HEALTH;
@@ -33,11 +33,6 @@ public class RobotMovement : MonoBehaviour, IDamageable
     private void Start()
     {
         ChangeState(RobotState.On);
-
-        outline = gameObject.AddComponent<Outline>();
-        outline.enabled = false;
-        outline.OutlineWidth = 10;
-        outline.OutlineColor = Color.red;
     }
 
     private void ChangeState(RobotState newState)

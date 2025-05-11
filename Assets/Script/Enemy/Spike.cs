@@ -1,53 +1,39 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
-public class Spike : MonoBehaviour, IDamageable
+public class Spike : MonoBehaviour, IDamageable, IPoolable
 {
     public AudioSource hitSound;
 
     private enum SpikeState { Grow, Fall, Grounded, Shrink }
     private SpikeState currentState = SpikeState.Grow;
     private Coroutine stateCoroutine;
-    private float hp = 3f;
+    private float hp;
 
     public GameObject needle;
     public Collider innerCollider;
     public Collider outerCollider;
 
-    private Outline outline;
+    public Outline outline;
     private Coroutine outlineCoroutine;
 
     private const int FALL_SPEED = 4;
-    public const float SPAWN_INTERVAL_SECONDS = 0.7f;
-    private const float SPAWN_ZONE = 38f;
-    private const float SPAWN_HEIGHT = 20f;
-
     private const int KNOCKBACK_FORCE = 500;
     private const int HIT_DAMAGE = 10;
+    private const float MAX_HEALTH = 3f;
 
-    private void Start()
+    public void Init()
     {
+        hp = MAX_HEALTH;
         transform.localScale = Vector3.one * 0.1f;
         needle.transform.localScale = Vector3.one * 0.1f;
         needle.SetActive(false);
         innerCollider.enabled = true;
         outerCollider.enabled = false;
-    
-        outline = gameObject.AddComponent<Outline>();
         outline.enabled = false;
-        outline.OutlineWidth = 10;
-        outline.OutlineColor = Color.red;
 
-        StartCoroutine(HandleState());
-    }
-
-    public static Vector3 GetRandomPosition()
-    {
-        return new Vector3(
-            Random.Range(-SPAWN_ZONE, SPAWN_ZONE),
-            SPAWN_HEIGHT,
-            Random.Range(-SPAWN_ZONE, SPAWN_ZONE)
-        );
+        ChangeState(SpikeState.Grow);
     }
 
     public void OnHit(float damage)
@@ -106,7 +92,9 @@ public class Spike : MonoBehaviour, IDamageable
                 break;
 
             case SpikeState.Shrink:
-                yield return ShrinkAndDestroy();
+                innerCollider.enabled = false;
+                outerCollider.enabled = false;
+                yield return Shrink();
                 break;
         }
     }
@@ -150,7 +138,7 @@ public class Spike : MonoBehaviour, IDamageable
         needle.transform.localScale = Vector3.one;
     }
 
-    private IEnumerator ShrinkAndDestroy()
+    private IEnumerator Shrink()
     {
         while (transform.localScale.x > 0.1f)
         {
@@ -165,7 +153,7 @@ public class Spike : MonoBehaviour, IDamageable
             yield return null;
         }
 
-        Destroy(gameObject);
+        SpikeManager.Instance.Return(this);
     }
 
     private void HitOutline()
@@ -182,5 +170,10 @@ public class Spike : MonoBehaviour, IDamageable
         outline.enabled = true;
         yield return new WaitForSeconds(0.2f);
         outline.enabled = false;
+    }
+
+    public void Reset()
+    {
+        StopAllCoroutines();
     }
 }
