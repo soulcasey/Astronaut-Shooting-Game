@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class PauseScreen : MonoBehaviour
 {
+    public Slider audioSlider;
     public Button resumeButton;
     public Button exitButton;
 
@@ -16,6 +17,10 @@ public class PauseScreen : MonoBehaviour
             gameObject.SetActive(false);
         });
         exitButton.onClick.AddListener(() => Application.Quit());
+        audioSlider.onValueChanged.AddListener((value) => 
+        {
+            AudioManager.Instance.SetVolume(value);
+        });
     }
 
     private void OnDisable()
@@ -25,6 +30,7 @@ public class PauseScreen : MonoBehaviour
 
     private void OnEnable()
     {
+        audioSlider.value = AudioListener.volume;
         GameManager.Instance.PauseGame(true);
     }
 }
