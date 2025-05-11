@@ -144,6 +144,8 @@ public class PlayerMovement : MonoBehaviour
 
         isRolling = true;
 
+        jumpSound.Play();
+
         Vector3 moveDirection = GetInputDirection();
 
         // Default forward if no input
